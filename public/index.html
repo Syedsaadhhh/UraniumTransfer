@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f7931a" />
+  <link rel="icon" href="data:," />
+  <title>Teranga · Save & Receive</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">₿</span>
+      <span class="brand-name">Teranga</span>
+      <span class="brand-tag" data-i18n="tagline">Save &amp; receive, without the melt</span>
+    </div>
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button data-lang="en" class="lang active">EN</button>
+      <button data-lang="fr" class="lang">FR</button>
+      <button data-lang="wo" class="lang">WO</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-tab="home" data-i18n="nav.home">Home</button>
+    <button class="tab" data-tab="receive" data-i18n="nav.receive">Receive</button>
+    <button class="tab" data-tab="send" data-i18n="nav.send">Send</button>
+    <button class="tab" data-tab="save" data-i18n="nav.save">Save</button>
+    <button class="tab" data-tab="advisor" data-i18n="nav.advisor">Advisor</button>
+  </nav>
+
+  <main id="app" aria-live="polite"></main>
+
+  <div id="overlay" class="overlay hidden" role="dialog" aria-modal="true">
+    <div class="card overlay-card" id="overlay-body"></div>
+  </div>
+
+  <footer class="footnote" data-i18n="disclaimer">Demo wallet. Regtest / simulated network. Not financial advice.</footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>

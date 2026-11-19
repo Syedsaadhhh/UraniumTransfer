@@ -1,0 +1,11 @@
+services:
+  uranium:
+    build: .
+    environment:
+      TRANSFER_MODE: sandbox
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - uranium-data:/app/data
+volumes:
+  uranium-data:
