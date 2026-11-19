@@ -42,6 +42,14 @@ lncli --network=regtest bakemacaroon --save_to=uranium-invoice.macaroon \
 
 Set `TRANSFER_MODE=lnd`, `TRANSFER_LND_URL=https://localhost:8080`, `TRANSFER_LND_CERT=/path/to/tls.cert`, and `TRANSFER_LND_MACAROON=/path/to/uranium-invoice.macaroon`, then run `npm start`. Pay the displayed QR/invoice from a separate test wallet. The app refuses mainnet at startup and never gets send permissions. The [Windows smoke test](scripts/regtest-smoke.ps1) provisions two disposable nodes for reproducible verification (Bitcoin Core 28.1, LND 0.18.5-beta).
 
+**Verified on regtest:** The payer node paid a 2,200-sat BOLT11 invoice created on the recipient node through UraniumTransfer. The app reported `waiting` before payment, then `paid_wallet` with that exact payment hash and amount. A second check preserved the settlement time, and `cashPayoutVerified` stayed false. No real funds were used.
+
+To reproduce with the above Windows binaries on a local machine, install app dependencies and run:
+
+```powershell
+.\scripts\regtest-smoke.ps1 -BitcoinBin 'C:\path\to\bitcoin\bin' -LndBin 'C:\path\to\lnd'
+```
+
 ## Architecture and safety
 
 ```text
