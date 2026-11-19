@@ -82,6 +82,56 @@ test("test-network mode never credits via sandbox and requires the node amount a
   assert.equal((await store.refresh(request.id)).state, "paid_wallet");
 });
 
+test("sender can share the selected quote; only recipient capability can submit a non-zero payout report", async () => {
+  let now = Date.now();
+  const store = new Transfers(undefined, undefined, () => now);
+  const { request, owner } = store.create(target);
+  assert.throws(() => store.reportPayout(request.id, "", {state:"collected", amount:"0"}), /not_recipient/);
+  let view = store.selectQuote(request.id, { ...route, source:"Provider quote · 20 Nov" });
+  assert.equal(view.selectedQuote?.name, "Entered quote");
+  assert.equal(view.selectedQuote?.senderTotalMinor, 7870);
+  assert.equal(view.selectedQuote?.expectedPayoutMinor, 50000);
+  assert.equal(view.payoutReport, undefined);
+  assert.equal("ownerHash" in view, false);
+  const quoteRevision = view.selectedQuote!.revision;
+  assert.throws(() => store.reportPayout(request.id, owner, {state:"collected", amount:"49500"}), /quote_changed/);
+  assert.throws(() => store.reportPayout(request.id, owner, {state:"collected", amount:"0",quoteRevision}), /invalid_amount/);
+  assert.throws(() => store.reportPayout(request.id, owner, {state:"collected", amount:"50000.123",quoteRevision}), /invalid_precision/);
+  view = store.reportPayout(request.id, owner, {state:"not_collected_yet",quoteRevision});
+  assert.deepEqual(view.payoutReport, {state:"not_collected_yet", amountMinor:null, quoteRevision, reportedAt:now});
+  now += 1500;
+  view = store.reportPayout(request.id, owner, {state:"collected", amount:"49500",quoteRevision});
+  assert.equal(view.payoutReport?.amountMinor, 49500);
+  assert.equal(view.payoutReport?.state, "collected");
+  assert.equal(view.selectedQuote?.expectedPayoutMinor, 50000);
+  assert.equal(view.cashPayoutVerified, false);
+  view = store.selectQuote(request.id,{...route,senderFee:"2",source:"Changed quote"});
+  assert.equal(view.payoutReport, undefined, "a report for the old quote must not be applied to a new promise");
+  assert.throws(() => store.reportPayout(request.id,owner,{state:"collected",amount:"49500",quoteRevision}),/quote_changed/);
+});
+
+test("a recipient payout report is pinned to the currently selected quote revision", () => {
+  let now = Date.now();
+  const store = new Transfers(undefined, undefined, () => now);
+  const {request,owner} = store.create(target);
+  const first = store.selectQuote(request.id,{...route,source:"Quote one"});
+  const firstAt = first.selectedQuote!.checkedAt;
+  const unchanged = store.selectQuote(request.id,{...route,source:"Quote one"});
+  assert.equal(unchanged.selectedQuote?.checkedAt,firstAt,"clock resolution may coincide");
+  assert.equal(unchanged.selectedQuote?.revision,first.selectedQuote!.revision + 1);
+  assert.equal(unchanged.payoutReport,undefined);
+  const unchangedRevision = unchanged.selectedQuote!.revision;
+  const sharedReport = store.reportPayout(request.id,owner,{state:"collected",amount:"49500",quoteRevision:unchangedRevision});
+  assert.equal(sharedReport.payoutReport?.amountMinor,49500);
+  now += 1000;
+  const changed = store.selectQuote(request.id,{...route,source:"Quote one updated"});
+  assert.equal(changed.selectedQuote?.revision,unchangedRevision+1);
+  assert.equal(changed.payoutReport,undefined);
+  assert.throws(()=>store.reportPayout(request.id,owner,{state:"not_collected_yet",quoteRevision:unchangedRevision}),/quote_changed/);
+  assert.deepEqual(store.reportPayout(request.id,owner,{state:"not_collected_yet",quoteRevision:changed.selectedQuote!.revision}).payoutReport,
+    {state:"not_collected_yet",amountMinor:null,quoteRevision:changed.selectedQuote!.revision,reportedAt:now});
+});
+
 test("HTTP happy path for a new corridor and private recipient / shareable sender capabilities", async () => {
   const app = makeApp(new Transfers(undefined));
   const server = app.listen(0, "127.0.0.1");
@@ -98,6 +148,20 @@ test("HTTP happy path for a new corridor and private recipient / shareable sende
     const { request, owner } = await created.json() as ReturnType<Transfers["create"]>;
     const path = `/api/requests/${request.id}`;
     assert.equal(request.targetMinor, 12010);
+    const selected = await post(`${path}/quote`, {quote:{name:"Local quote",rail:"mobile",rate:"12",senderFee:"1",percentFee:"0",receiverFee:"1",source:"Manually entered"}});
+    assert.equal(selected.status, 200);
+    const quoteAt = ((await selected.json()) as {selectedQuote:{expectedPayoutMinor:number;revision:number}}).selectedQuote;
+    assert.equal(quoteAt.expectedPayoutMinor, 12010);
+    assert.equal((await post(`${path}/payout-report`, {state:"collected",amount:"120",quoteRevision:quoteAt.revision})).status, 403);
+    const reported = await post(`${path}/payout-report`, {state:"collected",amount:"119.50",quoteRevision:quoteAt.revision},owner);
+    assert.equal(((await reported.json()) as {payoutReport:{amountMinor:number}}).payoutReport.amountMinor, 11950);
+    const reset = await post(`${path}/payout-report`, {state:"not_collected_yet",quoteRevision:quoteAt.revision},owner);
+    assert.equal(((await reset.json()) as {payoutReport:{amountMinor:number|null}}).payoutReport.amountMinor, null);
+    const changedQuote = await post(`${path}/quote`, {quote:{name:"Revised quote",rail:"mobile",rate:"13",senderFee:"1",percentFee:"0",receiverFee:"1"}});
+    assert.equal(changedQuote.status,200);
+    assert.equal(((await changedQuote.json()) as {payoutReport?:unknown}).payoutReport,undefined);
+    const stale = await post(`${path}/payout-report`,{state:"not_collected_yet",quoteRevision:quoteAt.revision},owner);
+    assert.equal(stale.status,409);
     assert.equal((await post(`${path}/invoice`, { amountSat: 500 })).status, 403);
     const invoice = (await (await post(`${path}/invoice`, { amountSat: 500 }, owner)).json() as { invoice: Invoice }).invoice;
     assert.equal((await post(`${path}/sandbox-pay`, { paymentHash: invoice.paymentHash }, owner)).status, 403);
@@ -108,6 +172,9 @@ test("HTTP happy path for a new corridor and private recipient / shareable sende
     const recipient = await open.json() as ReturnType<Transfers["view"]>;
     assert.equal(recipient.state, "paid_wallet");
     assert.equal(recipient.settlement?.amountSat, 500);
+    assert.equal(recipient.selectedQuote?.expectedPayoutMinor, 12010);
+    assert.equal(recipient.selectedQuote?.name, "Revised quote");
+    assert.equal(recipient.payoutReport, undefined);
     assert.equal(recipient.cashPayoutVerified, false);
     assert.equal(Object.hasOwn(recipient,"ownerHash"), false);
   } finally { server.close(); }

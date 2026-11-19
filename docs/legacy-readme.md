@@ -2,6 +2,8 @@
 
 This is the original concept and is kept for provenance. Its claims and setup refer to the historical prototype, not UraniumTransfer. To run that prototype on loopback with simulated funds: `npm run lab`. Do not enter a real recovery phrase. For the current app, see the [UraniumTransfer README](../README.md).
 
+Its old Docker instructions are not the active setup and are not a working network: see [`legacy/README.md`](../legacy/README.md). Do not use the historical wallet or placeholder node configs with real funds or an exposed interface.
+
 A **self-custodial Bitcoin + Lightning savings & remittance wallet** for French-speaking
 West Africa. Built for the **Dakar Bitcoin Hack 2026 (BTrust)**.
 

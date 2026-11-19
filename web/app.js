@@ -10,7 +10,8 @@ const copy = {
   newRequest:['New request','Nouvelle demande'], sender:['Sender view','Vue expéditeur'], recipient:['Recipient view','Vue bénéficiaire'], target:['Take-home target','Montant net souhaité'], requestMeta:['Payout target','Mode de versement'], share:['Copy sender link','Copier le lien expéditeur'], openSender:['Open sender view ↗','Ouvrir la vue expéditeur ↗'], privateLink:['Keep your recipient tab or bookmark it privately. Never share the recipient link.','Gardez cet onglet ou ajoutez-le à vos favoris privés. Ne partagez pas le lien bénéficiaire.'],
   wallet:['Bitcoin wallet value','Valeur en portefeuille Bitcoin'], cash:['Cash pickup','Retrait en espèces'], mobile:['Mobile money balance','Solde d’argent mobile'], bank:['Bank deposit','Virement bancaire'],
   compareStep:['02 / QUOTE CHECK','02 / COMPARER'], compare:['Compare the sender’s total','Comparer le total à envoyer'], compareDescription:['Copy the rate and fees from a provider. Use 0 only when a fee is known to be zero. Calculations are estimates, not live prices.','Recopiez le taux et les frais d’un prestataire. Saisissez 0 uniquement si les frais sont nuls. Les résultats sont des estimations, pas des tarifs en direct.'],
-  route:['Route','Offre'], routeName:['Provider or route name','Nom du prestataire ou de l’offre'], source:['Source / date (optional)','Source / date (facultatif)'], rate:['Units received per 1','Unités reçues pour 1'], flat:['Fixed sender fee','Frais fixes à l’envoi'], percent:['Sender fee (%)','Frais à l’envoi (%)'], deduction:['Fee deducted at payout','Frais déduits à l’arrivée'], add:['+ Add a quote','+ Ajouter une offre'], remove:['Remove','Retirer'], examples:['Load sample quotes','Charger des exemples'], compareAction:['Calculate totals','Calculer les totaux'], unknown:['Rate or fee missing','Taux ou frais manquants'], mismatch:['Different payout · not ranked','Versement différent · non classé'], lowest:['Lowest entered total','Total saisi le plus bas'], sendCost:['Sender pays','Total expéditeur'], totalFees:['Sender fees','Frais à l’envoi'], exampleWarning:['Illustrative rates only. Replace these with actual provider figures.','Taux fictifs. Remplacez-les par les chiffres réels des prestataires.'], currentQuotes:['Quotes are stored only in this browser.','Les devis restent dans ce navigateur.'],
+   route:['Route','Offre'], routeName:['Provider or route name','Nom du prestataire ou de l’offre'], source:['Source / date (optional)','Source / date (facultatif)'], rate:['Units received per 1','Unités reçues pour 1'], flat:['Fixed sender fee','Frais fixes à l’envoi'], percent:['Sender fee (%)','Frais à l’envoi (%)'], deduction:['Fee deducted at payout','Frais déduits à l’arrivée'], add:['+ Add a quote','+ Ajouter une offre'], remove:['Remove','Retirer'], examples:['Load sample quotes','Charger des exemples'], compareAction:['Calculate totals','Calculer les totaux'], unknown:['Rate or fee missing','Taux ou frais manquants'], mismatch:['Different payout · not ranked','Versement différent · non classé'], lowest:['Lowest entered total','Total saisi le plus bas'], sendCost:['Sender pays','Total expéditeur'], totalFees:['Sender fees','Frais à l’envoi'], exampleWarning:['Illustrative rates only. Replace these with actual provider figures.','Taux fictifs. Remplacez-les par les chiffres réels des prestataires.'], currentQuotes:['Quotes are stored only in this browser.','Les devis restent dans ce navigateur.'],
+    chooseQuote:['Share this quote','Partager ce devis'], chosenQuote:['Shared payout summary','Résumé du versement partagé'], noSelectedQuote:['No sender quote selected yet.','Aucun devis d’expéditeur sélectionné.'], quoteSaved:['Shared quote updated','Devis partagé mis à jour'], checkedAt:['Checked','Vérifié le'], promised:['Expected at destination','Montant prévu à destination'], declaredDeduction:['Known recipient fee','Frais connus à l’arrivée'], reportHeading:['Recipient’s payout report','Déclaration du bénéficiaire'], reportHelp:['Optional. Once submitted, anyone with the sender link can see it. Report only what arrived; the difference does not establish why it happened.','Facultatif. Après envoi, cette information est visible via le lien expéditeur. Indiquez seulement le montant reçu ; l’écart n’en explique pas la cause.'], selectQuoteBeforeReport:['Select a quote before reporting an outcome.','Sélectionnez un devis avant de déclarer un résultat.'], quote_required:['Select and share a quote before reporting an outcome.','Sélectionnez et partagez un devis avant de déclarer un résultat.'], quote_changed:['The selected quote changed. Review it and submit your report again.','Le devis a changé. Vérifiez-le puis renvoyez votre déclaration.'], notYet:['Not collected yet','Pas encore retiré'], collected:['I collected this amount','J’ai reçu ce montant'], submitReport:['Share payout report','Partager le versement déclaré'], reportNone:['No payout amount shared yet','Aucun versement déclaré partagé'], reportWaiting:['Recipient says: not collected yet','Le bénéficiaire indique : pas encore retiré'], reportActual:['Recipient-reported amount','Montant déclaré par le bénéficiaire'], difference:['Difference from quoted payout','Écart par rapport au devis'], below:['below expected','en dessous du montant prévu'], above:['above expected','au-dessus du montant prévu'], reportNoReason:['Recipient-reported difference; reason not established.','Écart déclaré par le bénéficiaire ; la cause n’est pas établie.'], reportError:['Enter a valid amount greater than zero.','Saisissez un montant supérieur à zéro.'],
   settleStep:['03 / WALLET STATUS','03 / ÉTAT DU PAIEMENT'], settlement:['What actually settled?','Quel paiement a été reçu ?'], settleDescription:['A wallet invoice tracks sats, not delivery of your target currency.','Une facture suit les sats, pas le versement dans la devise souhaitée.'], noInvoice:['No wallet invoice yet','Aucune facture de portefeuille'], waiting:['Waiting for wallet payment','En attente de paiement'], invoiceExpired:['Invoice expired','Facture expirée'], paidSandbox:['Paid to sandbox wallet','Reçu dans le portefeuille simulé'], paidTestnet:['Confirmed by Lightning test node','Confirmé par le nœud Lightning de test'],
   sats:['Invoice amount in sats','Montant de la facture en sats'], satsHelp:['Set the sats separately. There is no automatic conversion or exchange rate guarantee.','Définissez les sats séparément. Aucun taux de change ni conversion automatique n’est garanti.'], newInvoice:['Create test invoice','Créer la facture test'], retryInvoice:['Create another invoice','Créer une autre facture'],
   cashNo:['Cash / mobile money / bank payout: not available or verified here.','Espèces, argent mobile ou virement : aucun versement disponible ou vérifié ici.'], senderWait:['The recipient must create the test invoice before you can pay.','Le bénéficiaire doit créer la facture test avant le paiement.'], sandboxInfo:['Switch to the sender view to pay with seeded test sats. No funds leave a Lightning wallet.','Ouvrez la vue expéditeur pour payer en sats fictifs. Aucun fonds ne quitte un portefeuille Lightning.'], senderBalance:['Sender test balance','Solde test expéditeur'], receiverBalance:['Recipient test balance','Solde test bénéficiaire'], sandboxPay:['Pay from sender sandbox','Payer depuis le solde simulé'], currentInvoice:['Test invoice','Facture de test'], copyInvoice:['Copy invoice','Copier la facture'], qr:['Test Lightning invoice QR','Code QR de la facture Lightning de test'], extPay:['Use a separate wallet on the same test network. Never send mainnet funds.','Utilisez un autre portefeuille sur le même réseau de test. N’envoyez jamais de fonds réels.'], refresh:['Check status','Actualiser le statut'], receipt:['Download test receipt','Télécharger le reçu de test'], noCashProof:['Receipt records wallet settlement only, not a cash payout.','Le reçu atteste uniquement de l’état du portefeuille, pas d’un retrait.'],
@@ -95,12 +96,12 @@ function renderRequest() {
   const places = [request.origin || request.from,request.destination || request.to];
   $('#app').innerHTML = `<section class="request-head"><div class="inline"><a class="btn ghost" href="/">← ${tr('newRequest')}</a><span class="role">${tr(owner ? 'recipient' : 'sender')}</span></div><h1>${tr('target')}: <span>${e(money(request.targetMinor,request.to))}</span></h1><p class="request-sub">${e(places[0])} → ${e(places[1])} · ${e(request.from)} → ${e(request.to)} · ${tr(request.rail)}</p>
     ${owner ? `<div class="actions gap"><button class="btn primary" id="share" type="button">${tr('share')}</button><a class="btn" href="${e(shareUrl())}" target="_blank" rel="noopener noreferrer">${tr('openSender')}</a></div><p class="caption gap">${tr('privateLink')}</p>` : ''}</section>
-    <div class="grid"><section class="card" aria-labelledby="comp-title"><div class="kicker">${tr('compareStep')}</div><h2 id="comp-title">${tr('compare')}</h2><p class="caption">${tr('compareDescription')}</p>
+     <div class="grid"><section class="card" aria-labelledby="comp-title"><div class="kicker">${tr('compareStep')}</div><h2 id="comp-title">${tr('compare')}</h2><p class="caption">${tr('compareDescription')}</p>
     <form class="gap stack" id="quote-form"><div class="stack" id="quote-rows"></div><div class="actions"><button class="btn" id="add-quote" type="button">${tr('add')}</button>${isExample() ? `<button class="btn ghost" id="sample" type="button">${tr('examples')}</button>` : ''}</div><p class="note warn" id="sample-warning" ${sample ? '' : 'hidden'}>${tr('exampleWarning')}</p>
     <div><button class="btn primary" type="submit">${tr('compareAction')}${arrow}</button></div><div class="error" id="quote-error" role="alert"></div><div class="stack tight" id="quote-result" aria-live="polite"></div><p class="caption">${tr('currentQuotes')}</p></form></section>
-    <section class="card" aria-labelledby="pay-title"><div class="kicker">${tr('settleStep')}</div><h2 id="pay-title">${tr('settlement')}</h2><p class="caption">${tr('settleDescription')}</p><div id="payment" class="stack gap"></div></section></div>`;
+     <section class="card stack" aria-labelledby="pay-title"><div><div class="kicker">${tr('settleStep')}</div><h2 id="pay-title">${tr('settlement')}</h2><p class="caption">${tr('settleDescription')}</p></div><section id="shared-summary" class="stack tight"></section><section id="payout-report" class="stack tight"></section><div id="payment" class="stack"></div></section></div>`;
   if (owner) $('#share').onclick = () => clipboard(shareUrl());
-  renderRows(); renderQuotes(); renderPayment();
+  renderRows(); renderQuotes(); renderSharedSummary(); renderPayoutReport(); renderPayment();
   $('#add-quote').onclick = () => { if (routeRows.length < 5) { routeRows.push(emptyRow()); saveRows(); renderRows(); const rows = document.querySelectorAll('fieldset.route'); $('[name="name"]',rows[rows.length-1]).focus(); } };
   if (isExample()) $('#sample').onclick = () => {
     routeRows = [
@@ -147,9 +148,60 @@ function renderQuotes() {
   const el = $('#quote-result'); if (!el) return;
   el.innerHTML = (quotes?.rows || []).slice().sort((a,b) => (a.requiredMinor ?? Infinity) - (b.requiredMinor ?? Infinity)).map(row => {
     const best = row.requiredMinor != null && row.requiredMinor === quotes.lowestMinor;
-    return `<div class="quote-result ${best ? 'best' : ''}"><div><b>${e(routeRows[row.index]?.name?.trim() || `${t('route')} ${row.index+1}`)}</b><div class="caption">${best ? `${tr('lowest')} · ` : ''}${tr(row.rail)}${row.source ? ` · ${e(row.source)}` : ''}</div>${row.requiredMinor != null ? `<div class="caption">${tr('totalFees')}: ${e(money(row.senderFeeMinor,request.from))}</div>` : ''}</div>
-    ${row.requiredMinor != null ? `<div><div class="caption">${tr('sendCost')}</div><strong>${e(money(row.requiredMinor,request.from))}</strong></div>` : `<div class="caption">${tr(row.reason === 'payout_mismatch' ? 'mismatch' : 'unknown')}</div>`}</div>`;
+    const route = routeRows[row.index];
+    const selected = row.requiredMinor != null && request.selectedQuote && row.requiredMinor === request.selectedQuote.senderTotalMinor && row.name === request.selectedQuote.name && row.source === request.selectedQuote.source && row.rail === request.selectedQuote.rail;
+    return `<div class="quote-result ${best ? 'best' : ''}"><div><b>${e(route?.name?.trim() || `${t('route')} ${row.index+1}`)}</b><div class="caption">${selected ? `${tr('chosenQuote')} · ` : best ? `${tr('lowest')} · ` : ''}${tr(row.rail)}${row.source ? ` · ${e(row.source)}` : ''}</div>${row.requiredMinor != null ? `<div class="caption">${tr('totalFees')}: ${e(money(row.senderFeeMinor,request.from))}<br>${tr('declaredDeduction')}: ${e(money(row.receiverFeeMinor,request.to))}</div>` : ''}</div>
+    ${row.requiredMinor != null ? `<div class="stack tight"><div><div class="caption">${tr('sendCost')}</div><strong>${e(money(row.requiredMinor,request.from))}</strong></div><button class="btn ${selected ? 'ghost' : ''} select-quote" data-quote="${row.index}" type="button">${tr(selected ? 'quoteSaved' : 'chooseQuote')}</button></div>` : `<div class="caption">${tr(row.reason === 'payout_mismatch' ? 'mismatch' : 'unknown')}</div>`}</div>`;
   }).join('');
+  for (const button of document.querySelectorAll('.select-quote')) button.onclick = () => saveSelectedQuote(button,routeRows[Number(button.dataset.quote)]);
+}
+
+function renderSharedSummary() {
+  const el = $('#shared-summary'); if (!el) return;
+  const quote = request.selectedQuote;
+  el.innerHTML = `<div class="kicker">${tr('chosenQuote')}</div>${quote ? `<div class="route stack tight"><div class="inline"><strong>${e(quote.name)}</strong><span class="role">${tr(quote.rail)}</span></div>${quote.source ? `<div class="caption">${tr('source')}: ${e(quote.source)}</div>` : ''}<div class="two"><div class="balance"><span class="caption">${tr('sendCost')}</span><strong>${e(money(quote.senderTotalMinor,request.from))}</strong></div><div class="balance"><span class="caption">${tr('promised')}</span><strong>${e(money(quote.expectedPayoutMinor,request.to))}</strong></div></div><div class="two"><span class="caption">${tr('declaredDeduction')}: ${e(money(quote.knownPayoutFeeMinor,request.to))}</span><span class="caption">${tr('checkedAt')}: ${e(new Date(quote.checkedAt).toLocaleString(locale()))}</span></div></div>` : `<p class="note">${tr('noSelectedQuote')}</p>`}`;
+}
+
+function renderPayoutReport() {
+  const el = $('#payout-report'); if (!el) return;
+  const payout = request.payoutReport;
+  const sameQuote = payout && request.selectedQuote && payout.quoteRevision === request.selectedQuote.revision;
+  const diff = payout?.state === 'collected' && payout.amountMinor != null && sameQuote
+    ? payout.amountMinor - request.selectedQuote.expectedPayoutMinor : null;
+  const result = payout ? payout.state === 'not_collected_yet'
+    ? `<div class="note">${tr('reportWaiting')} · ${e(new Date(payout.reportedAt).toLocaleString(locale()))}</div>`
+    : `<div class="route stack tight"><div><span class="caption">${tr('reportActual')}</span><strong class="block">${e(money(payout.amountMinor,request.to))}</strong></div>${diff == null ? '' : `<div><span class="caption">${tr('difference')}</span><br><strong>${diff === 0 ? e(money(0,request.to)) : `${e(money(Math.abs(diff),request.to))} ${tr(diff < 0 ? 'below' : 'above')}`}</strong></div>`}<p class="caption">${tr('reportNoReason')}</p><span class="caption">${tr('checkedAt')}: ${e(new Date(payout.reportedAt).toLocaleString(locale()))}</span></div>`
+    : `<p class="caption">${tr('reportNone')}</p>`;
+  el.innerHTML = `<div class="kicker">${tr('reportHeading')}</div>${result}${owner ? `<details><summary class="btn ghost">${tr('submitReport')}</summary><p class="caption">${tr('reportHelp')}</p>${!request.selectedQuote ? `<p class="note">${tr('selectQuoteBeforeReport')}</p>` : ''}<form class="stack tight gap" id="report-form"><fieldset class="stack tight"><legend>${tr('reportHeading')}</legend><label class="inline"><input type="radio" name="payout-state" value="not_collected_yet" checked> ${tr('notYet')}</label><label class="inline"><input type="radio" name="payout-state" value="collected"> ${tr('collected')}</label></fieldset><label>${tr('reportActual')} (${e(request.to)})<input name="amount" inputmode="decimal" maxlength="15" placeholder="49500"></label><div><button class="btn primary" type="submit" ${request.selectedQuote ? '' : 'disabled'}>${tr('submitReport')}</button></div><div class="error" id="report-error" role="alert"></div></form></details>` : ''}`;
+  const form = $('#report-form');
+  if (form) {
+    const amount = form.elements.amount, radios = [...form.querySelectorAll('input[name="payout-state"]')];
+    const updateVisibility = () => { amount.parentElement.hidden = !radios.some(radio => radio.checked && radio.value === 'collected'); };
+    radios.forEach(radio => radio.addEventListener('change',updateVisibility)); updateVisibility();
+    form.onsubmit = ev => {
+      ev.preventDefault();
+      const state = new FormData(form).get('payout-state'), value = amount.value.trim();
+      if (state === 'collected' && (!/^[0-9]{1,9}(?:[.,][0-9]{1,8})?$/.test(value) || /^0+(?:[.,]0+)?$/.test(value))) { $('#report-error').textContent = t('reportError'); return; }
+      changeReport($('button[type="submit"]',form),state === 'collected' ? {state,amount:value,quoteRevision:request.selectedQuote?.revision} : {state,quoteRevision:request.selectedQuote?.revision});
+    };
+  }
+}
+
+async function saveSelectedQuote(button, quote) {
+  if (!quote) return;
+  button.disabled = true;
+  try { request = await api(`${base}/quote`,'POST',{quote}); renderSharedSummary(); renderPayoutReport(); renderQuotes(); }
+  catch (error) { report($('#quote-error'),error); }
+  finally { button.disabled = false; }
+}
+
+async function changeReport(button, body) {
+  if (!owner || paymentBusy) return;
+  paymentBusy = true; button.disabled = true;
+  const error = $('#report-error'); if (error) error.textContent = '';
+  try { request = await api(`${base}/payout-report`,'POST',body); renderSharedSummary(); renderPayoutReport(); }
+  catch (err) { report(error,err); }
+  finally { paymentBusy = false; button.disabled = false; }
 }
 
 function renderPayment() {
@@ -173,21 +225,26 @@ function renderPayment() {
   if ($('#copy-invoice')) $('#copy-invoice').onclick = () => clipboard(invoice.paymentRequest);
   if ($('#receipt')) $('#receipt').onclick = () => {
     const text = {version:1,requestId:request.id,targetCurrency:request.to,targetMinor:request.targetMinor,desiredPayout:request.rail,
-      walletSettlement:settlement,cashPayoutVerified:false,statement:'Test-only wallet settlement record; not proof of cash payout.'};
+      selectedQuote:request.selectedQuote || null,payoutReport:request.payoutReport ? {...request.payoutReport,attribution:'recipient_reported_unverified'} : null,
+      walletSettlement:{amountSat:settlement.amountSat,settledAt:settlement.settledAt,mode:settlement.mode},cashPayoutVerified:false,
+      statement:'Test-only status record. Recipient reports are self-reported; wallet settlement is not proof of local payout.'};
     const url = URL.createObjectURL(new Blob([JSON.stringify(text,null,2)],{type:'application/json'}));
     const a = document.createElement('a'); a.href = url; a.download = 'uranium-transfer-test-receipt.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 }
 
 async function refreshPayment(visible = false) {
-  if (!request || checking || paymentBusy || request.settlement) return;
+  if (!request || checking || paymentBusy) return;
+  const current = request;
   checking = true;
   try {
-    const next = request.mode === 'testnet' && request.invoice ? await api(`${base}/refresh`,'POST') : await api(base);
-    if (paymentBusy || (request.settlement && !next.settlement) || (request.invoice && !next.invoice)) return;
-    const changed = next.state !== request.state || next.invoice?.paymentHash !== request.invoice?.paymentHash;
+    const next = request.mode === 'testnet' && request.invoice && !request.settlement ? await api(`${base}/refresh`,'POST') : await api(base);
+    if (paymentBusy || request !== current || (request.settlement && !next.settlement) || (request.invoice && !next.invoice)) return;
+    const changed = next.state !== request.state || next.invoice?.paymentHash !== request.invoice?.paymentHash ||
+      next.selectedQuote?.revision !== request.selectedQuote?.revision || next.payoutReport?.reportedAt !== request.payoutReport?.reportedAt ||
+      next.payoutReport?.state !== request.payoutReport?.state || next.payoutReport?.amountMinor !== request.payoutReport?.amountMinor;
     request = next;
-    if (changed) renderPayment();
+    if (changed) { renderPayment(); renderSharedSummary(); renderPayoutReport(); renderQuotes(); }
   } catch (error) { if (visible) report($('#pay-error'),error); }
   finally { checking = false; }
 }

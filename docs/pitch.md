@@ -1,4 +1,6 @@
-# Teranga — 3-minute demo pitch
+# ARCHIVED — Teranga wallet lab pitch
+
+This script describes the old wallet lab and contains illustrative, time-sensitive claims that do not describe UraniumTransfer. For the current demo, see `uranium-demo.md`.
 
 **Format:** screen-share + live demo on `http://localhost:3000` (or a short recording).
 

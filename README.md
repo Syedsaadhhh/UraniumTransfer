@@ -2,7 +2,7 @@
 
 **Start with what needs to arrive.** A recipient-first remittance planner and test-only Lightning settlement prototype for [Dakar Bitcoin Hack by BTrust](https://dakar-bitcoin-hack-2026.devpost.com/).
 
-Awa in Dakar needs **50,000 XOF in cash**, not “whatever remains after fees.” She shares a target rather than guessing what her cousin in Paris should send. Her cousin enters provider quotes and sees the *total to send* for the same take-home amount. A cheaper quote that lands in a Bitcoin wallet is **not ranked** against cash pickup. If they test a Lightning payment, both see when sats reach the wallet without being told that cash was paid out.
+Awa in Dakar needs **50,000 XOF in cash**, not “whatever remains after fees.” She shares a target rather than guessing what her cousin in Paris should send. Her cousin enters provider quotes and sees the *total to send* for the same take-home amount. A cheaper quote that lands in a Bitcoin wallet is **not ranked** against cash pickup. The sender can share one selected, timestamped quote so both views see what amount was expected. After a payout, Awa can optionally report what she says she collected—or “not collected yet.” The recorded difference has no assumed reason and is not provider-verified. If they test a Lightning payment, both see when sats reach the wallet without being told that cash was paid out.
 
 Paris → Dakar is an optional example. Create your own corridor, choose currencies, and compare cash, mobile money, bank, or Bitcoin-wallet payout. No provider accounts are needed for the planner. Quotes are manually entered, not live; the app does **not** convert funds, deliver cash, or integrate with Wave or Orange Money.
 
@@ -16,7 +16,7 @@ npm ci && npm start
 
 Open [localhost:3000](http://localhost:3000). Or run `docker compose up --build` for the sandbox. No payment credentials or real money are needed.
 
-**Try both sides:** Select **Try an example**, create the request, and load sample quotes. Then create a test invoice for **2,200 sats**, open **Sender view**, and select **Pay from sender sandbox**. Return to the recipient tab; it shows the exact invoice settled, both test balances update once, and the separate cash-out status does not change. Download the test receipt from either view. Create another request (e.g. GBP → GHS, mobile money) to try real quote inputs for another corridor.
+**Try both sides:** Select **Try an example**, create the request, and load sample quotes. Select a cash quote to share it. The sender’s separate tab now shows that quote and the expected payout. In the recipient tab, submit **Not collected yet**; the sender sees the report separately. Optionally submit “I collected this amount” with an illustrative amount such as 49,500 XOF to demonstrate the reported difference—this is not a real-user test or verified payout. A different shared quote expires the old report; submit it again against that quote. Finally, create a test invoice for **2,200 sats**, open **Sender view**, and select **Pay from sender sandbox**. Both views then show the settled invoice, while the cash-out status remains separate. Create another request (e.g. GBP → GHS, mobile money) to try other corridors.
 
 ```sh
 npm test
@@ -29,7 +29,7 @@ npm run typecheck
 | --- | --- | --- |
 | Default **sandbox** | A request-scoped test ledger binds a debit and credit to the invoice hash; expired invoices and replay cannot create another credit. | There is no Lightning network traffic or real balance. |
 | Optional **LND test network** | Creates a BOLT11 invoice on a configured LND node. A separate wallet can pay it, and UraniumTransfer checks the receiving node for exact hash and amount before recording settlement. | No mainnet, managed user custody, routing guarantee, live exchange or local payout. |
-| Separate **wallet lab** (`npm run lab`) | The original Teranga code exercises BIP39, BIP84 and real P2WPKH signing against a simulated on-chain ledger. | This lab is not part of the public prototype and should not receive real seeds or funds. |
+| Separate **wallet lab** (`npm run lab`) | The original Teranga code exercises BIP39, BIP84 and real P2WPKH signing against a simulated on-chain ledger. | This lab is not part of the public prototype and should not receive real seeds or funds. The old node configs are archived and are not used by the current Docker Compose app. |
 
 ### Optional LND mode
 
@@ -60,13 +60,19 @@ Sender (share link) ── compare / read status ────────┘    
 ```
 
 - The server ranks only requests with the same payout type and known rate and fees. It rounds the sender amount up in the sender’s currency. Rates and fees can change: the planner does not guarantee a provider’s final quote.
-- The sender link is a bearer link, not authentication. Keep the separate recipient link private. The owner capability is hashed at rest and omitted from API views. Neither link should contain a name, account number, or payment credentials. Quotes stay in the browser unless submitted for calculation; the server does not persist them.
+- The sender link is a bearer link, not authentication. Keep the separate recipient link private. The owner capability is hashed at rest and omitted from API views. Neither link should contain a name, account number, or payment credentials. Quote rows stay in the sender’s browser; only the selected, timestamped quote and the recipient’s optional self-reported payout amount are stored for both views. Each selected quote has its own revision; an outcome report is accepted only against the current revision, and selecting another quote invalidates the previous report. Reports are not checked against the provider or a cash agent.
 - Records persist across restarts in `data/` by default (`TRANSFER_DATA_FILE` overrides the path). Links expire after 30 days; writes prune expired records. Use a single app instance, a persistent volume, and HTTPS if hosting a public sandbox. By default the native app only binds to loopback; set `HOST=0.0.0.0` explicitly if your host requires it.
 - No public legacy wallet routes, no server-side seed collection in the app, no analytics, no payment preimages included in the receipt. No data goes to a Nostr relay. The exported JSON is a test record, not a signed or legally verifiable cash receipt.
 - Frontend is HTML/CSS/JS, no third-party runtime calls, with French and English, reduced-motion support, and responsive layout.
 
+## What we learned from the novelty review
+
+UraniumTransfer works best as a **shared decision record**, not a claim to invent remittances. The PDF notes that recipient-initiated requests and price comparison already exist as concepts. Our narrower hypothesis joins the recipient’s requested payout to one shared, timestamped quote, a recipient-reported outcome, and a separate Lightning wallet status. This surfaces an evidence gap; it cannot prove why a payout differed, global novelty, participant demand, or prize placement. See the [novelty review and truth boundary](docs/novelty-review.md).
+
 ## Impact and next step
 
-[IFAD’s RemitSCOPE Africa](https://remitscope.org/africa/) and the [World Bank Remittance Prices Worldwide database](https://remittanceprices.worldbank.org/) provide background on remittances and costs; the sample calculator values are **not** quotes from either source. No field results or fee savings are claimed yet. Pilot with ten France–Senegal sender/recipient pairs and measure quote completion, time to choose comparable payouts, whether both people correctly interpret “paid to wallet,” and the gap between an entered cash quote and what actually arrives. Next: validate the workflow with participants, then integrate read-only quotes from one licensed provider and confirm independently what proof of local payout is available.
+[IFAD’s RemitSCOPE Africa](https://remitscope.org/africa/) and the [World Bank Remittance Prices Worldwide database](https://remittanceprices.worldbank.org/) provide background on remittances and costs; the sample calculator values are **not** quotes from either source. No interviews, field results, representative research, or fee savings are claimed. The current desktop-research hypothesis is that showing one chosen payout promise beside the recipient’s unverified outcome may clarify a transfer; the prototype can be tested without recruiting participants. Validate wording and real-use assumptions before treating that hypothesis as evidence of impact. Next: validate the workflow, then integrate read-only quotes from one licensed provider and confirm independently what proof of local payout is available.
 
-See the [three-minute pitch and demo sequence](docs/uranium-demo.md). The [legacy lab README](docs/legacy-readme.md) and older Teranga documents are historical, not claims about this app.
+See the [three-minute pitch and demo sequence](docs/uranium-demo.md). The [legacy lab README](docs/legacy-readme.md), [archived regtest configs](legacy/README.md), and older Teranga documents are historical, not instructions or claims about this app.
+
+Project terms: [MIT License](LICENSE).

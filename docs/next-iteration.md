@@ -1,4 +1,6 @@
-# Teranga — Metrics, constraints & next iteration
+# ARCHIVED — Teranga wallet lab metrics and roadmap
+
+This document refers to the old wallet lab. It is not a roadmap, metrics report, or impact claim for the current UraniumTransfer app. See `uranium-demo.md` for its honest next step.
 
 ## Metrics to track (from day one of a real build)
 

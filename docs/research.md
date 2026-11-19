@@ -1,4 +1,6 @@
-# Teranga — Research & Opportunity Report
+# ARCHIVED — Teranga wallet lab desk research
+
+Historical, directional desk research for the prior Teranga wallet concept (19 November 2026). It is not user-interview evidence, not independently re-verified for this release, and does not describe achieved impact or prove a competitive novelty claim. Figures, source links, the persona, and dated market details require re-check before use. See the current [UraniumTransfer evidence boundary and hypothesis](../README.md#impact-and-next-step).
 
 **Subtitle:** Pain-driven product research for the Dakar Bitcoin Hack 2026 (BTrust).
 **Challenge:** *"Create tools that will enhance the life of African people, around or on top

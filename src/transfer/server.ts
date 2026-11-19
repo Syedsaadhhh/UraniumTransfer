@@ -54,6 +54,10 @@ export function makeApp(store: Transfers, network?: string) {
   app.post("/api/requests", limited("create", 20), handler((req, res) => res.status(201).json(store.create(targetFrom(req.body)))));
   app.get("/api/requests/:id", handler((req, res) => res.json(store.view(id(req)))));
   app.post("/api/requests/:id/compare", handler((req, res) => res.json(store.quote(id(req), object(req.body).routes))));
+  app.post("/api/requests/:id/quote", limited("quote", 40), handler((req, res) => res.json(store.selectQuote(id(req), object(req.body).quote))));
+  app.post("/api/requests/:id/payout-report", limited("report", 20), handler((req, res) => {
+    res.json(store.reportPayout(id(req), key(req.get("Authorization")?.replace(/^Bearer /, ""), 403, "not_recipient"), req.body));
+  }));
   app.post("/api/requests/:id/invoice", limited("invoice", 25), handler(async (req, res) => {
     res.json(await store.invoice(id(req), key(req.get("Authorization")?.replace(/^Bearer /, ""), 403, "not_recipient"), req.body));
   }));

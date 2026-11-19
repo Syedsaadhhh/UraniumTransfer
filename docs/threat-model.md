@@ -1,4 +1,6 @@
-# Teranga — Threat model & security by design
+# ARCHIVED — Teranga wallet lab threat model
+
+This model covers the old wallet lab only; it is not a security review of the active UraniumTransfer app. See the root README for current prototype caveats.
 
 ## Scope
 

@@ -108,6 +108,23 @@ export interface Settlement {
   settledAt: number;
   mode: Mode;
 }
+export interface SelectedQuote {
+  revision: number;
+  name: string;
+  source: string;
+  checkedAt: number;
+  rail: Rail;
+  senderTotalMinor: number;
+  senderFeesMinor: number;
+  expectedPayoutMinor: number;
+  knownPayoutFeeMinor: number;
+}
+export interface PayoutReport {
+  state: "collected" | "not_collected_yet";
+  amountMinor: number | null;
+  quoteRevision: number;
+  reportedAt: number;
+}
 export interface Transfer extends Target {
   id: string;
   ownerHash: string;
@@ -115,6 +132,8 @@ export interface Transfer extends Target {
   createdAt: number;
   invoice?: Invoice;
   settlement?: Settlement;
+  selectedQuote?: SelectedQuote;
+  payoutReport?: PayoutReport;
 }
 
 export interface TestWallet {
@@ -179,6 +198,46 @@ export class Transfers {
   }
 
   quote(id: string, rows: unknown) { return compare(this.get(id), rows); }
+
+  selectQuote(id: string, raw: unknown) {
+    const row = this.get(id);
+    const quote = object(raw);
+    const result = compare(row, [quote]);
+    const calculated = result.rows[0];
+    if (calculated.requiredMinor == null || calculated.senderFeeMinor == null || calculated.receiverFeeMinor == null) {
+      throw new InputError("quote_incomplete");
+    }
+    const selectedQuote: SelectedQuote = {
+      revision: (row.selectedQuote?.revision ?? 0) + 1,
+      name: calculated.name,
+      source: calculated.source,
+      checkedAt: this.now(),
+      rail: calculated.rail as Rail,
+      senderTotalMinor: calculated.requiredMinor,
+      senderFeesMinor: calculated.senderFeeMinor,
+      expectedPayoutMinor: row.targetMinor,
+      knownPayoutFeeMinor: calculated.receiverFeeMinor,
+    };
+    this.save({ ...row, selectedQuote, payoutReport: undefined });
+    return this.view(id);
+  }
+
+  reportPayout(id: string, rawOwner: string, raw: unknown) {
+    const row = this.get(id);
+    if (!same(hash(rawOwner), row.ownerHash)) throw new InputError("not_recipient", 403);
+    const body = object(raw);
+    if (!row.selectedQuote) throw new InputError("quote_required", 409);
+    if (body.quoteRevision !== row.selectedQuote.revision) throw new InputError("quote_changed", 409);
+    if (body.state === "not_collected_yet") {
+      this.save({ ...row, payoutReport: { state: "not_collected_yet", amountMinor: null, quoteRevision: row.selectedQuote.revision, reportedAt: this.now() } });
+      return this.view(id);
+    }
+    if (body.state !== "collected") throw new InputError("invalid_input");
+    const amountMinor = Number(decimal(body.amount, digits(row.to), 100_000_000_000n));
+    if (amountMinor === 0) throw new InputError("invalid_amount");
+    this.save({ ...row, payoutReport: { state: "collected", amountMinor, quoteRevision: row.selectedQuote.revision, reportedAt: this.now() } });
+    return this.view(id);
+  }
 
   private creating = new Set<string>();
 

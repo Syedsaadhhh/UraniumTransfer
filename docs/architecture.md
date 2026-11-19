@@ -1,4 +1,6 @@
-# Teranga — Architecture
+# ARCHIVED — Teranga wallet lab architecture
+
+This diagram and implementation describe the legacy wallet lab, not the active UraniumTransfer prototype. See the root README and `src/transfer/` for the current application. The lab is retained for the previously verified Bitcoin signing demonstration; it is not wired to public prototype request or payout-report flows.
 
 ## Overview
 
