@@ -1,0 +1,27 @@
+# Render Blueprint — one-click deploy of the online MVP.
+# After connecting the repo, set the two secrets in the Render dashboard
+# (marked sync:false): AI_API_KEY (Groq) and NOSTR_SECRET_KEY (optional, for a
+# stable signing identity across restarts).
+services:
+  - type: web
+    name: uraniumtransfer
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/config
+    autoDeploy: true
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+      - key: TRANSFER_MODE
+        value: sandbox
+      # Groq (OpenAI-compatible). Swap AI_MODEL if you prefer another model.
+      - key: AI_BASE_URL
+        value: https://api.groq.com/openai/v1
+      - key: AI_MODEL
+        value: llama-3.3-70b-versatile
+      - key: NOSTR_RELAYS
+        value: wss://relay.damus.io,wss://nos.lol,wss://relay.nostr.band
+      - key: AI_API_KEY
+        sync: false
+      - key: NOSTR_SECRET_KEY
+        sync: false

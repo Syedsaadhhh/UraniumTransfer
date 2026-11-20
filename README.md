@@ -23,6 +23,22 @@ npm test
 npm run typecheck
 ```
 
+## Deploy the online MVP (Render)
+
+The repo ships a [`render.yaml`](render.yaml) Blueprint and a `Dockerfile`.
+
+1. In Render, choose **New → Blueprint** and pick this repo. Render reads `render.yaml`,
+   builds the Docker image, and starts the server on `$PORT`.
+2. In the service's **Environment**, set the secrets:
+   - `AI_API_KEY` — a Groq key from <https://console.groq.com/keys>. Without it the rules
+     engine still answers, so nothing breaks.
+   - `NOSTR_SECRET_KEY` — optional, 64 hex chars, for a stable signing identity across
+     restarts.
+3. Health check is `GET /api/config`. Open the URL and try an example.
+
+Notes: the free plan uses an ephemeral disk, so JSON records reset on redeploy — fine for
+a demo. The Blueprint sets `HOST=0.0.0.0` and `TRANSFER_MODE=sandbox`.
+
 ## What’s real, and what’s not
 
 | Mode | Wallet behavior | What it doesn’t prove |
