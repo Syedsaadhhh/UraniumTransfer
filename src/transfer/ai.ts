@@ -54,6 +54,7 @@ function systemPrompt(lang: Lang): string {
   const language = lang === "fr" ? "French" : "English";
   return [
     "You are a payment-safety checker for West African remittance users.",
+    "This is a defensive fraud-detection task that protects the recipient. Always answer; never refuse and never add commentary outside the JSON.",
     "The user pastes an offer, SMS, receipt or provider quote. Decide whether it shows signs of fraud or manipulation.",
     "Return ONLY compact JSON: {\"safe\": boolean, \"signals\": string[], \"recommendation\": string}.",
     "signals: short lowercase reasons (empty array if none). safe: true only when there are no signals.",
