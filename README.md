@@ -65,6 +65,29 @@ Sender (share link) ── compare / read status ────────┘    
 - No public legacy wallet routes, no server-side seed collection in the app, no analytics, no payment preimages included in the receipt. No data goes to a Nostr relay. The exported JSON is a test record, not a signed or legally verifiable cash receipt.
 - Frontend is HTML/CSS/JS, no third-party runtime calls, with French and English, reduced-motion support, and responsive layout.
 
+## Trust layer: signed records, an AI check, and a resolution plan
+
+Three additions sit on top of the planner. All of them work with **no keys and no
+network**:
+
+- **Signed records.** Selecting a quote, reporting a payout, or filing an issue signs a
+  small, PII-free **NIP-78 Nostr event**. Either side can verify it at
+  `GET /api/requests/:id/verify`; publishing to relays is best-effort and never blocks a
+  response.
+- **AI safety check.** `POST /api/assistant/analyze` reads a pasted offer, SMS or receipt
+  for fraud signals. A deterministic **rules engine** always answers offline; an optional
+  OpenAI-compatible model (`AI_API_KEY`) upgrades it. The model never produces rates or
+  amounts, so it cannot corrupt the money math.
+- **Resolution plan.** When a destination is wrong, a fee is charged for a failed
+  operation, or a payout arrives short, `POST /api/requests/:id/issue` stores the issue
+  and returns an ordered, escalating resolution plan. The difference is reported, never
+  explained.
+
+Endpoints and design are in [`docs/trust-layer.md`](docs/trust-layer.md); the positioning
+against the other gallery projects is in
+[`docs/differentiation.md`](docs/differentiation.md); configuration is in
+[`.env.example`](.env.example).
+
 ## What we learned from the novelty review
 
 UraniumTransfer works best as a **shared decision record**, not a claim to invent remittances. The PDF notes that recipient-initiated requests and price comparison already exist as concepts. Our narrower hypothesis joins the recipient’s requested payout to one shared, timestamped quote, a recipient-reported outcome, and a separate Lightning wallet status. This surfaces an evidence gap; it cannot prove why a payout differed, global novelty, participant demand, or prize placement. See the [novelty review and truth boundary](docs/novelty-review.md).

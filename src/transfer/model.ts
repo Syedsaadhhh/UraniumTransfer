@@ -1,6 +1,8 @@
 import { randomBytes, timingSafeEqual, createHash } from "node:crypto";
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
+import { Attestor, type Attestation } from "./nostr.js";
+import { buildResolution, isIssueType, type IssueType, type Resolution } from "./resolution.js";
 
 export const currencies = Intl.supportedValuesOf("currency");
 export type Rail = "wallet" | "cash" | "mobile" | "bank";
@@ -125,6 +127,15 @@ export interface PayoutReport {
   quoteRevision: number;
   reportedAt: number;
 }
+export interface StoredIssue {
+  type: IssueType;
+  note: string;
+  amountMinor: number | null;
+  reportedMinor: number | null;
+  expectedMinor: number;
+  createdAt: number;
+  resolution: Resolution;
+}
 export interface Transfer extends Target {
   id: string;
   ownerHash: string;
@@ -134,6 +145,9 @@ export interface Transfer extends Target {
   settlement?: Settlement;
   selectedQuote?: SelectedQuote;
   payoutReport?: PayoutReport;
+  issue?: StoredIssue;
+  /** Signed, PII-free Nostr attestations of the shared record (quote, report, issue). */
+  attestations?: Attestation[];
 }
 
 export interface TestWallet {
@@ -145,7 +159,12 @@ export interface TestWallet {
 export class Transfers {
   private rows: Map<string, Transfer>;
 
-  constructor(private filename: string | undefined, private wallet?: TestWallet, private now = Date.now) {
+  constructor(
+    private filename: string | undefined,
+    private wallet?: TestWallet,
+    private now = Date.now,
+    private attestor?: Attestor
+  ) {
     let rows: Transfer[] = [];
     if (filename) {
       try { rows = JSON.parse(readFileSync(filename, "utf8")); }
@@ -155,6 +174,15 @@ export class Transfers {
   }
 
   get mode(): Mode { return this.wallet ? "testnet" : "sandbox"; }
+
+  get pubkey(): string | undefined { return this.attestor?.pubkey; }
+
+  /** Sign a PII-free attestation of the shared record and attach it (no network here). */
+  private attest(row: Transfer, type: string, payload: Record<string, unknown>): void {
+    if (!this.attestor) return;
+    const revision = row.selectedQuote?.revision ?? 0;
+    row.attestations = [...(row.attestations ?? []), this.attestor.attest(type, row.id, revision, payload)];
+  }
 
   private save(row: Transfer): void {
     const next = new Map([...this.rows].filter(([, v]) => this.now() - v.createdAt < retention));
@@ -218,7 +246,20 @@ export class Transfers {
       expectedPayoutMinor: row.targetMinor,
       knownPayoutFeeMinor: calculated.receiverFeeMinor,
     };
-    this.save({ ...row, selectedQuote, payoutReport: undefined });
+    const next: Transfer = { ...row, selectedQuote, payoutReport: undefined };
+    this.attest(next, "quote", {
+      request: row.id,
+      revision: selectedQuote.revision,
+      from: row.from,
+      to: row.to,
+      rail: row.rail,
+      targetMinor: row.targetMinor,
+      senderTotalMinor: selectedQuote.senderTotalMinor,
+      expectedPayoutMinor: selectedQuote.expectedPayoutMinor,
+      provider: selectedQuote.name,
+      source: selectedQuote.source,
+    });
+    this.save(next);
     return this.view(id);
   }
 
@@ -228,15 +269,70 @@ export class Transfers {
     const body = object(raw);
     if (!row.selectedQuote) throw new InputError("quote_required", 409);
     if (body.quoteRevision !== row.selectedQuote.revision) throw new InputError("quote_changed", 409);
+    let payoutReport: PayoutReport;
     if (body.state === "not_collected_yet") {
-      this.save({ ...row, payoutReport: { state: "not_collected_yet", amountMinor: null, quoteRevision: row.selectedQuote.revision, reportedAt: this.now() } });
-      return this.view(id);
+      payoutReport = { state: "not_collected_yet", amountMinor: null, quoteRevision: row.selectedQuote.revision, reportedAt: this.now() };
+    } else if (body.state === "collected") {
+      const amountMinor = Number(decimal(body.amount, digits(row.to), 100_000_000_000n));
+      if (amountMinor === 0) throw new InputError("invalid_amount");
+      payoutReport = { state: "collected", amountMinor, quoteRevision: row.selectedQuote.revision, reportedAt: this.now() };
+    } else {
+      throw new InputError("invalid_input");
     }
-    if (body.state !== "collected") throw new InputError("invalid_input");
-    const amountMinor = Number(decimal(body.amount, digits(row.to), 100_000_000_000n));
-    if (amountMinor === 0) throw new InputError("invalid_amount");
-    this.save({ ...row, payoutReport: { state: "collected", amountMinor, quoteRevision: row.selectedQuote.revision, reportedAt: this.now() } });
+    const next: Transfer = { ...row, payoutReport };
+    this.attest(next, "payout", {
+      request: row.id,
+      revision: payoutReport.quoteRevision,
+      state: payoutReport.state,
+      from: row.from,
+      to: row.to,
+      rail: row.rail,
+      expectedPayoutMinor: row.selectedQuote.expectedPayoutMinor,
+      reportedMinor: payoutReport.amountMinor,
+    });
+    this.save(next);
     return this.view(id);
+  }
+
+  reportIssue(id: string, rawOwner: string, raw: unknown) {
+    const row = this.get(id);
+    if (!same(hash(rawOwner), row.ownerHash)) throw new InputError("not_recipient", 403);
+    const body = object(raw);
+    if (!isIssueType(body.type)) throw new InputError("invalid_issue");
+    const note = label(body.note, 280, "");
+    const amountMinor = body.amount == null || body.amount === ""
+      ? null
+      : Number(decimal(body.amount, digits(row.to), 100_000_000_000n));
+    const reportedMinor = amountMinor ?? row.payoutReport?.amountMinor ?? null;
+    const expectedMinor = row.selectedQuote?.expectedPayoutMinor ?? row.targetMinor;
+    const issue: StoredIssue = {
+      type: body.type,
+      note,
+      amountMinor,
+      reportedMinor,
+      expectedMinor,
+      createdAt: this.now(),
+      resolution: buildResolution({ type: body.type, rail: row.rail, expectedMinor, reportedMinor, from: row.from, to: row.to, note }),
+    };
+    const next: Transfer = { ...row, issue };
+    this.attest(next, "issue", {
+      request: row.id,
+      type: issue.type,
+      from: row.from,
+      to: row.to,
+      rail: row.rail,
+      expectedMinor,
+      reportedMinor,
+    });
+    this.save(next);
+    return this.view(id);
+  }
+
+  /** Record which relays accepted a previously stored attestation. */
+  markPublished(id: string, eventId: string, relays: string[]): void {
+    const row = this.get(id);
+    const attestations = (row.attestations ?? []).map((a) => (a.event.id === eventId ? { ...a, relays } : a));
+    this.save({ ...row, attestations });
   }
 
   private creating = new Set<string>();

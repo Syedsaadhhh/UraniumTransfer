@@ -4,6 +4,8 @@ import { fileURLToPath } from "node:url";
 import QRCode from "qrcode";
 import { currencies, InputError, object, targetFrom, Transfers, type TestWallet } from "./model.js";
 import { LndReceiver } from "./lnd.js";
+import { Attestor, relayList } from "./nostr.js";
+import { aiEnabled, aiModel, analyze as analyzeText, explainShortfall, type Lang } from "./ai.js";
 
 const web = fileURLToPath(new URL("../../web/", import.meta.url));
 const keyPattern = /^[A-Za-z0-9_-]{24}$/;
@@ -17,7 +19,19 @@ const handler = (fn: (req: Request, res: Response) => unknown) => (req: Request,
   Promise.resolve().then(() => fn(req, res)).catch(next);
 };
 
-export function makeApp(store: Transfers, network?: string) {
+export function makeApp(store: Transfers, network?: string, attestor?: Attestor) {
+  const relays = attestor ? relayList() : [];
+  // Best-effort: publish any attestation that has not reached a relay yet. Never
+  // blocks or fails a response — the signed event is already stored either way.
+  const publish = (id: string) => {
+    if (!attestor || !relays.length) return;
+    for (const attestation of store.view(id).attestations ?? []) {
+      if (attestation.relays.length) continue;
+      void attestor.publish(attestation.event, relays)
+        .then((accepted) => { if (accepted.length) store.markPublished(id, attestation.event.id, accepted); })
+        .catch(() => {});
+    }
+  };
   const app = express();
   app.disable("x-powered-by");
   app.use((_req, res, next) => {
@@ -50,13 +64,55 @@ export function makeApp(store: Transfers, network?: string) {
   }
 
   const id = (req: Request) => key(req.params.id, 404, "request_not_found");
-  app.get("/api/config", (_req, res) => res.json({ mode: store.mode, currencies, network }));
+  app.get("/api/config", (_req, res) => res.json({
+    mode: store.mode,
+    currencies,
+    network,
+    nostr: { enabled: !!attestor, pubkey: attestor?.pubkey ?? null, relays },
+    ai: { enabled: aiEnabled(), model: aiEnabled() ? aiModel() : null },
+  }));
   app.post("/api/requests", limited("create", 20), handler((req, res) => res.status(201).json(store.create(targetFrom(req.body)))));
   app.get("/api/requests/:id", handler((req, res) => res.json(store.view(id(req)))));
   app.post("/api/requests/:id/compare", handler((req, res) => res.json(store.quote(id(req), object(req.body).routes))));
-  app.post("/api/requests/:id/quote", limited("quote", 40), handler((req, res) => res.json(store.selectQuote(id(req), object(req.body).quote))));
+  app.post("/api/requests/:id/quote", limited("quote", 40), handler((req, res) => {
+    const view = store.selectQuote(id(req), object(req.body).quote);
+    publish(id(req));
+    res.json(view);
+  }));
   app.post("/api/requests/:id/payout-report", limited("report", 20), handler((req, res) => {
-    res.json(store.reportPayout(id(req), key(req.get("Authorization")?.replace(/^Bearer /, ""), 403, "not_recipient"), req.body));
+    const view = store.reportPayout(id(req), key(req.get("Authorization")?.replace(/^Bearer /, ""), 403, "not_recipient"), req.body);
+    publish(id(req));
+    res.json(view);
+  }));
+  app.post("/api/requests/:id/issue", limited("issue", 20), handler((req, res) => {
+    const view = store.reportIssue(id(req), key(req.get("Authorization")?.replace(/^Bearer /, ""), 403, "not_recipient"), req.body);
+    publish(id(req));
+    res.json(view);
+  }));
+  app.get("/api/requests/:id/verify", handler((req, res) => {
+    res.json({
+      pubkey: attestor?.pubkey ?? null,
+      kind: attestor?.kind ?? null,
+      attestations: (store.view(id(req)).attestations ?? []).map((a) => ({ ...a, valid: Attestor.verify(a.event) })),
+    });
+  }));
+  app.post("/api/assistant/analyze", limited("analyze", 30), handler(async (req, res) => {
+    const body = object(req.body);
+    const text = typeof body.text === "string" ? body.text.slice(0, 2000) : "";
+    if (!text.trim()) throw new InputError("invalid_input");
+    const lang: Lang = body.lang === "fr" ? "fr" : "en";
+    res.json(await analyzeText(text, lang));
+  }));
+  app.get("/api/requests/:id/explain", limited("explain", 40), handler(async (req, res) => {
+    const view = store.view(id(req));
+    const lang: Lang = req.query.lang === "fr" ? "fr" : "en";
+    res.json(await explainShortfall({
+      state: view.payoutReport?.state ?? "not_collected_yet",
+      expectedMinor: view.selectedQuote?.expectedPayoutMinor ?? view.targetMinor,
+      reportedMinor: view.payoutReport?.amountMinor ?? view.issue?.reportedMinor ?? null,
+      currency: view.to,
+      rail: view.rail,
+    }, lang));
   }));
   app.post("/api/requests/:id/invoice", limited("invoice", 25), handler(async (req, res) => {
     res.json(await store.invoice(id(req), key(req.get("Authorization")?.replace(/^Bearer /, ""), 403, "not_recipient"), req.body));
@@ -95,9 +151,11 @@ async function start() {
     if (!url || !cert || !macaroon) throw new Error("LND invoice credentials and HTTPS origin are required");
     wallet = await LndReceiver.open(url, cert, macaroon);
   }
-  const store = new Transfers(process.env.TRANSFER_DATA_FILE || `data/transfers-${mode}.json`, wallet);
+  const attestor = process.env.NOSTR_DISABLE === "true" ? undefined : new Attestor();
+  const store = new Transfers(process.env.TRANSFER_DATA_FILE || `data/transfers-${mode}.json`, wallet, Date.now, attestor);
   const port = Number(process.env.PORT || 3000), host = process.env.HOST || "127.0.0.1";
-  makeApp(store, wallet?.network).listen(port, host, () => console.log(`UraniumTransfer (${wallet?.network || "sandbox"}) at http://${host}:${port}`));
+  makeApp(store, wallet?.network, attestor).listen(port, host, () =>
+    console.log(`UraniumTransfer (${wallet?.network || "sandbox"}) at http://${host}:${port}` + (attestor ? ` · nostr ${attestor.pubkey.slice(0, 12)}…` : "")));
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {

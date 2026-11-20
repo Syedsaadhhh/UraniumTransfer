@@ -17,6 +17,13 @@ const copy = {
   cashNo:['Cash / mobile money / bank payout: not available or verified here.','Espèces, argent mobile ou virement : aucun versement disponible ou vérifié ici.'], senderWait:['The recipient must create the test invoice before you can pay.','Le bénéficiaire doit créer la facture test avant le paiement.'], sandboxInfo:['Switch to the sender view to pay with seeded test sats. No funds leave a Lightning wallet.','Ouvrez la vue expéditeur pour payer en sats fictifs. Aucun fonds ne quitte un portefeuille Lightning.'], senderBalance:['Sender test balance','Solde test expéditeur'], receiverBalance:['Recipient test balance','Solde test bénéficiaire'], sandboxPay:['Pay from sender sandbox','Payer depuis le solde simulé'], currentInvoice:['Test invoice','Facture de test'], copyInvoice:['Copy invoice','Copier la facture'], qr:['Test Lightning invoice QR','Code QR de la facture Lightning de test'], extPay:['Use a separate wallet on the same test network. Never send mainnet funds.','Utilisez un autre portefeuille sur le même réseau de test. N’envoyez jamais de fonds réels.'], refresh:['Check status','Actualiser le statut'], receipt:['Download test receipt','Télécharger le reçu de test'], noCashProof:['Receipt records wallet settlement only, not a cash payout.','Le reçu atteste uniquement de l’état du portefeuille, pas d’un retrait.'],
   request_not_found:['This link is missing or has expired.','Ce lien est introuvable ou a expiré.'], invalid_amount:['Enter a valid positive amount and the correct decimal precision.','Saisissez un montant positif valide avec le bon nombre de décimales.'], invalid_currency:['Select a supported currency.','Choisissez une devise prise en charge.'], invalid_precision:['This currency or field allows fewer decimal places.','Ce champ ou cette devise accepte moins de décimales.'], invalid_input:['Please check the values you entered.','Vérifiez les valeurs saisies.'], invalid_rate:['Enter a rate greater than zero.','Saisissez un taux supérieur à zéro.'], quote_out_of_range:['One calculated total is out of range. Check its rate and fees.','Un total dépasse la limite. Vérifiez son taux et ses frais.'], service_unavailable:['Service unavailable. Try again in a moment.','Service indisponible. Réessayez dans un instant.'], invoice_exists:['An invoice already exists. Refresh the request.','Une facture existe déjà. Actualisez la demande.'], invoice_expired:['This invoice expired. Ask the recipient to make another.','Cette facture a expiré. Demandez-en une autre au bénéficiaire.'], invoice_mismatch:['The invoice changed. Check the status and try again.','La facture a changé. Actualisez le statut et réessayez.'], not_recipient:['Only the private recipient link can create this invoice.','Seul le lien privé du bénéficiaire permet de créer cette facture.'], mode_changed:['This server is now on a different payment network.','Le serveur utilise un autre réseau de paiement.'], rate_limited:['Too many requests. Try again in a minute.','Trop de demandes. Réessayez dans une minute.'], copied:['Copied to clipboard','Copié'], copyBlocked:['Could not copy; use the link directly.','Copie impossible ; utilisez le lien directement.'],
 };
+Object.assign(copy, {
+  aiHeading:['AI safety check','Vérification IA'], aiHint:['Paste an offer, SMS or receipt. A model reads it for fraud signals; a built-in rules engine answers even offline.','Collez une offre, un SMS ou un reçu. Un modèle y cherche des signaux de fraude ; un moteur de règles répond même hors ligne.'], aiPaste:['Text to check','Texte à vérifier'], aiCheck:['Check this text','Vérifier ce texte'], aiSafe:['No fraud signal found','Aucun signal de fraude'], aiRisky:['Possible fraud — be careful','Fraude possible — prudence'], aiRules:['rules engine','moteur de règles'],
+  trustHeading:['Problem & resolution','Problème et solution'], trustNone:['No issue reported. If money did not arrive as agreed, report it below.','Aucun problème signalé. Si l’argent n’est pas arrivé comme convenu, signalez-le ci-dessous.'],
+  issueSubmit:['Report a problem','Signaler un problème'], issueHint:['Visible to both sides through the share link. Reported here, kept with the shared record.','Visible des deux côtés via le lien partagé. Conservé avec le dossier partagé.'], issueType:['Problem type','Type de problème'], issueNote:['Short note (optional)','Note courte (facultatif)'], issueNotePlaceholder:['What happened, in your words','Ce qui s’est passé, en vos mots'], resolutionHeading:['Resolution plan','Plan de résolution'],
+  issue_wrong_destination:['Sent to the wrong place','Envoyé au mauvais endroit'], issue_failed_fee:['Charged for a failed operation','Frais pour une opération échouée'], issue_shortfall:['Arrived short','Montant reçu incomplet'], issue_uncollected:['Not collected yet','Pas encore retiré'], issue_other:['Something else','Autre chose'],
+  attestVerify:['Verify signed record','Vérifier le dossier signé'], attestPubkey:['Signing key','Clé de signature'], attestValid:['signature valid','signature valide'], attestInvalid:['signature INVALID','signature INVALIDE'], attestRelays:['Relays','Relais'], attestOffline:['not published (offline)','non publié (hors ligne)'], invalid_issue:['Choose a problem type.','Choisissez un type de problème.'],
+});
 const t = key => copy[key]?.[lang === 'fr' ? 1 : 0] ?? key;
 const e = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const tr = key => e(t(key));
@@ -98,10 +105,13 @@ function renderRequest() {
     ${owner ? `<div class="actions gap"><button class="btn primary" id="share" type="button">${tr('share')}</button><a class="btn" href="${e(shareUrl())}" target="_blank" rel="noopener noreferrer">${tr('openSender')}</a></div><p class="caption gap">${tr('privateLink')}</p>` : ''}</section>
      <div class="grid"><section class="card" aria-labelledby="comp-title"><div class="kicker">${tr('compareStep')}</div><h2 id="comp-title">${tr('compare')}</h2><p class="caption">${tr('compareDescription')}</p>
     <form class="gap stack" id="quote-form"><div class="stack" id="quote-rows"></div><div class="actions"><button class="btn" id="add-quote" type="button">${tr('add')}</button>${isExample() ? `<button class="btn ghost" id="sample" type="button">${tr('examples')}</button>` : ''}</div><p class="note warn" id="sample-warning" ${sample ? '' : 'hidden'}>${tr('exampleWarning')}</p>
-    <div><button class="btn primary" type="submit">${tr('compareAction')}${arrow}</button></div><div class="error" id="quote-error" role="alert"></div><div class="stack tight" id="quote-result" aria-live="polite"></div><p class="caption">${tr('currentQuotes')}</p></form></section>
-     <section class="card stack" aria-labelledby="pay-title"><div><div class="kicker">${tr('settleStep')}</div><h2 id="pay-title">${tr('settlement')}</h2><p class="caption">${tr('settleDescription')}</p></div><section id="shared-summary" class="stack tight"></section><section id="payout-report" class="stack tight"></section><div id="payment" class="stack"></div></section></div>`;
+    <div><button class="btn primary" type="submit">${tr('compareAction')}${arrow}</button></div><div class="error" id="quote-error" role="alert"></div><div class="stack tight" id="quote-result" aria-live="polite"></div>
+    <details class="stack tight"><summary class="btn ghost">${tr('aiHeading')}</summary><p class="caption">${tr('aiHint')}</p><label>${tr('aiPaste')}<textarea id="ai-text" rows="3" maxlength="2000"></textarea></label><div><button class="btn" type="button" id="ai-check">${tr('aiCheck')}</button></div><div id="ai-result" class="stack tight" aria-live="polite"></div></details>
+    <p class="caption">${tr('currentQuotes')}</p></form></section>
+     <section class="card stack" aria-labelledby="pay-title"><div><div class="kicker">${tr('settleStep')}</div><h2 id="pay-title">${tr('settlement')}</h2><p class="caption">${tr('settleDescription')}</p></div><section id="shared-summary" class="stack tight"></section><section id="payout-report" class="stack tight"></section><section id="trust" class="stack tight"></section><div id="payment" class="stack"></div></section></div>`;
   if (owner) $('#share').onclick = () => clipboard(shareUrl());
-  renderRows(); renderQuotes(); renderSharedSummary(); renderPayoutReport(); renderPayment();
+  renderRows(); renderQuotes(); renderSharedSummary(); renderPayoutReport(); renderTrust(); renderPayment();
+  if ($('#ai-check')) $('#ai-check').onclick = ev => runAiCheck(ev.currentTarget,$('#ai-text').value);
   $('#add-quote').onclick = () => { if (routeRows.length < 5) { routeRows.push(emptyRow()); saveRows(); renderRows(); const rows = document.querySelectorAll('fieldset.route'); $('[name="name"]',rows[rows.length-1]).focus(); } };
   if (isExample()) $('#sample').onclick = () => {
     routeRows = [
@@ -190,7 +200,7 @@ function renderPayoutReport() {
 async function saveSelectedQuote(button, quote) {
   if (!quote) return;
   button.disabled = true;
-  try { request = await api(`${base}/quote`,'POST',{quote}); renderSharedSummary(); renderPayoutReport(); renderQuotes(); }
+  try { request = await api(`${base}/quote`,'POST',{quote}); renderSharedSummary(); renderPayoutReport(); renderQuotes(); renderTrust(); }
   catch (error) { report($('#quote-error'),error); }
   finally { button.disabled = false; }
 }
@@ -199,7 +209,7 @@ async function changeReport(button, body) {
   if (!owner || paymentBusy) return;
   paymentBusy = true; button.disabled = true;
   const error = $('#report-error'); if (error) error.textContent = '';
-  try { request = await api(`${base}/payout-report`,'POST',body); renderSharedSummary(); renderPayoutReport(); }
+  try { request = await api(`${base}/payout-report`,'POST',body); renderSharedSummary(); renderPayoutReport(); renderTrust(); }
   catch (err) { report(error,err); }
   finally { paymentBusy = false; button.disabled = false; }
 }
@@ -244,7 +254,7 @@ async function refreshPayment(visible = false) {
       next.selectedQuote?.revision !== request.selectedQuote?.revision || next.payoutReport?.reportedAt !== request.payoutReport?.reportedAt ||
       next.payoutReport?.state !== request.payoutReport?.state || next.payoutReport?.amountMinor !== request.payoutReport?.amountMinor;
     request = next;
-    if (changed) { renderPayment(); renderSharedSummary(); renderPayoutReport(); renderQuotes(); }
+    if (changed) { renderPayment(); renderSharedSummary(); renderPayoutReport(); renderQuotes(); renderTrust(); }
   } catch (error) { if (visible) report($('#pay-error'),error); }
   finally { checking = false; }
 }
@@ -293,3 +303,51 @@ if (requestPage) window.addEventListener('hashchange',() => location.reload());
   } catch (error) { missing(copy[error.message] ? error.message : 'service_unavailable'); }
   finally { $('#app').removeAttribute('aria-busy'); }
 })();
+
+function renderTrust() {
+  const el = $('#trust'); if (!el) return;
+  const issue = request.issue;
+  const resolution = issue
+    ? `<div class="route stack tight"><div class="kicker">${tr('resolutionHeading')}</div><div class="caption">${tr('issueType')}: ${tr('issue_' + issue.type)}</div>${issue.note ? `<div class="caption">${tr('issueNote')}: ${e(issue.note)}</div>` : ''}<ol class="steps">${issue.resolution.steps.map(s => `<li><div><h3>${e(s.title)}</h3><p class="caption">${e(s.detail)}</p></div></li>`).join('')}</ol></div>`
+    : `<p class="caption">${tr('trustNone')}</p>`;
+  const form = owner
+    ? `<details><summary class="btn ghost">${tr('issueSubmit')}</summary><p class="caption">${tr('issueHint')}</p><form class="stack tight gap" id="issue-form"><label>${tr('issueType')}<select name="type">${['wrong_destination','failed_fee','shortfall','uncollected','other'].map(v => `<option value="${v}">${tr('issue_' + v)}</option>`).join('')}</select></label><label>${tr('issueNote')}<input name="note" maxlength="280" placeholder="${e(t('issueNotePlaceholder'))}"></label><div><button class="btn primary" type="submit">${tr('issueSubmit')}</button></div><div class="error" id="issue-error" role="alert"></div></form></details>`
+    : '';
+  el.innerHTML = `<div class="kicker">${tr('trustHeading')}</div>${resolution}${form}<div class="stack tight" id="attest"><button class="btn ghost" type="button" id="verify">${tr('attestVerify')}</button></div>`;
+  const f = $('#issue-form');
+  if (f) f.onsubmit = ev => { ev.preventDefault(); const body = Object.fromEntries(new FormData(f)); changeIssue($('button[type="submit"]', f), { type: body.type, note: body.note }); };
+  const v = $('#verify'); if (v) v.onclick = verifyAttestations;
+}
+
+async function changeIssue(button, body) {
+  if (paymentBusy) return; paymentBusy = true; button.disabled = true;
+  const error = $('#issue-error'); if (error) error.textContent = '';
+  try { request = await api(`${base}/issue`, 'POST', body); renderTrust(); renderPayoutReport(); renderSharedSummary(); }
+  catch (err) { report(error, err); }
+  finally { paymentBusy = false; button.disabled = false; }
+}
+
+async function verifyAttestations() {
+  const box = $('#attest'); if (!box) return;
+  box.innerHTML = `<span class="caption">${tr('loading')}</span>`;
+  try {
+    const data = await api(`${base}/verify`);
+    const rows = (data.attestations || []).map(a => {
+      const label = (a.event.tags || []).map(x => x[1]).filter(x => x && x !== 'uraniumtransfer' && !/^\d/.test(x))[0] || 'record';
+      return `<div class="route stack tight"><div class="inline"><strong>${e(label)}</strong><span class="role">${a.valid ? tr('attestValid') : tr('attestInvalid')}</span></div><div class="caption">${tr('attestRelays')}: ${a.relays && a.relays.length ? e(a.relays.join(', ')) : tr('attestOffline')}</div></div>`;
+    }).join('');
+    box.innerHTML = `<div class="caption">${tr('attestPubkey')}: ${e(String(data.pubkey || '').slice(0, 16))}…</div>${rows || `<p class="caption">${tr('trustNone')}</p>`}<button class="btn ghost" type="button" id="verify">${tr('attestVerify')}</button>`;
+    const again = $('#verify'); if (again) again.onclick = verifyAttestations;
+  } catch (err) { box.innerHTML = `<span class="caption">${t('service_unavailable')}</span>`; }
+}
+
+async function runAiCheck(button, text) {
+  const out = $('#ai-result'); if (!out) return;
+  if (!text || !text.trim()) { out.innerHTML = `<span class="caption">${t('invalid_input')}</span>`; return; }
+  button.disabled = true; out.innerHTML = `<span class="caption">${tr('loading')}</span>`;
+  try {
+    const v = await api('/assistant/analyze', 'POST', { text, lang });
+    out.innerHTML = `<div class="route stack tight"><div class="inline"><strong>${e(v.safe ? t('aiSafe') : t('aiRisky'))}</strong><span class="role">${e(v.source === 'llm' ? (v.model || 'AI') : t('aiRules'))}</span></div>${(v.signals && v.signals.length) ? `<ul class="caption">${v.signals.map(s => `<li>${e(s)}</li>`).join('')}</ul>` : ''}<p class="caption">${e(v.recommendation)}</p></div>`;
+  } catch (err) { out.innerHTML = `<span class="caption">${t('service_unavailable')}</span>`; }
+  finally { button.disabled = false; }
+}
